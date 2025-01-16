@@ -1,0 +1,40 @@
+{% extends "greek_nt/base.html" %} {% block title %}Greek NT Search{% endblock %}
+%} {% block content %}
+<div class="max-w-3xl mx-auto">
+  <h1 class="text-3xl font-bold text-center mb-8">
+    Greek New Testament Search
+  </h1>
+
+  <form action="{% url 'greek_nt:search' %}" method="get" class="mb-8">
+    <div class="flex gap-4">
+      <input
+        type="search"
+        name="q"
+        placeholder="Search by Greek, English, or Strong's number..."
+        class="flex-1 rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+      />
+      <button
+        type="submit"
+        class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+      >
+        Search
+      </button>
+    </div>
+  </form>
+
+  <div class="grid md:grid-cols-3 gap-6">
+    <div class="bg-white p-6 rounded-lg shadow">
+      <h3 class="font-semibold mb-2">Greek Text</h3>
+      <p class="text-gray-600">Search using Greek text (e.g., λόγος)</p>
+    </div>
+    <div class="bg-white p-6 rounded-lg shadow">
+      <h3 class="font-semibold mb-2">English</h3>
+      <p class="text-gray-600">Search English translations</p>
+    </div>
+    <div class="bg-white p-6 rounded-lg shadow">
+      <h3 class="font-semibold mb-2">Strong's</h3>
+      <p class="text-gray-600">Search by Strong's number (e.g., G3056)</p>
+    </div>
+  </div>
+</div>
+{% endblock %}

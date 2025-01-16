@@ -52,6 +52,7 @@ class Token(models.Model):
     class Meta:
         db_table = "token"  # Explicitly set table name
         indexes = [
+            models.Index(fields=["text"]),  # Common lookup by reference
             models.Index(fields=["ref"]),  # Common lookup by reference
             models.Index(fields=["lemma"]),  # Common lookup by lemma
             models.Index(fields=["strong"]),  # Common lookup by Strong's number

@@ -104,6 +104,23 @@ argon2 = ["argon2-cffi (>=19.1.0)"]
 bcrypt = ["bcrypt"]
 
 [[package]]
+name = "django-tailwind"
+version = "3.8.0"
+description = "Tailwind CSS Framework for Django projects"
+optional = false
+python-versions = ">=3.10.0,<4.0.0"
+files = [
+    {file = "django_tailwind-3.8.0-py3-none-any.whl", hash = "sha256:fa969c5b95d314b173fe2b2ed2cb2c03f2e2c94fdc2c01ff73a993fa159085da"},
+    {file = "django_tailwind-3.8.0.tar.gz", hash = "sha256:31c2f4a7879d685c2de0feaf0b63f246200b37337bea4d7dbafb59bc3f10c008"},
+]
+
+[package.dependencies]
+django = ">=3.2.14"
+
+[package.extras]
+reload = ["django-browser-reload (>=1.12.1,<2.0.0)"]
+
+[[package]]
 name = "mypy-extensions"
 version = "1.0.0"
 description = "Type system extensions for programs checked with the mypy type checker."
@@ -181,4 +198,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.13"
-content-hash = "40caa963741bc5378071d1b9a36d363b64a6cd2c3919dccdf093902d0faf72ca"
+content-hash = "6c1d443f7e76f2395499de91876af69cd523f1f2aa4ffcd862e98a374b76fd7d"
