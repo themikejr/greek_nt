@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "greek-nt"
+version = "0.1.0"
+description = ""
+authors = ["Mike Brinker <themikejr@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.13"
+django = "^5.1.5"
+
+
+[tool.poetry.group.dev.dependencies]
+black = "^24.10.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
