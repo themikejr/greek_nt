@@ -27,8 +27,15 @@ SECRET_KEY = "django-insecure-c40@%2cl+u#b-62#4_d)x*@mi#+(u-_er9_i(00unpp(si=0_6
 DEBUG = True
 
 # Update ALLOWED_HOSTS setting
-ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "").split(",")
-CSRF_TRUSTED_ORIGINS = ["https://greek-nt.fly.dev"]
+ALLOWED_HOSTS = os.getenv(
+    "DJANGO_ALLOWED_HOSTS",
+    "gnt.mikebrinker.net,www.gnt.mikebrinker.net,greek-nt.fly.dev,localhost,0.0.0.0",
+).split(",")
+CSRF_TRUSTED_ORIGINS = [
+    "https://greek-nt.fly.dev",
+    "https://gnt.mikebrinker.net",
+    "https://www.gnt.mikebrinker.net",
+]
 
 # Application definition
 INSTALLED_APPS = [
