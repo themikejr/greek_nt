@@ -1,9 +1,17 @@
 from django.views.generic import ListView, TemplateView
+from django import template
 from django.db.models import Q
 from django.views.decorators.cache import cache_page
 from django.utils.decorators import method_decorator
 from django.conf import settings
 from .models import Token
+
+# register = template.Library()
+
+
+# @register.filter
+# def split(value, separator):
+#     return value.split(separator)
 
 
 class HomeView(TemplateView):

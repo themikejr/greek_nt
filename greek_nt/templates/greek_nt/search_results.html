@@ -1,4 +1,5 @@
 {% extends "greek_nt/base.html" %}
+{% load greek_nt_extras %}
 
 {% block title %}Search Results{% endblock %}
 
@@ -22,7 +23,7 @@
     </form>
 
     {% if verses %}
-          <div class="mb-6 flex justify-between items-center">
+        <div class="mb-6 flex justify-between items-center">
             <p class="text-sm text-gray-600">
                 Found {{ verses|length }} verse{{ verses|length|pluralize }}
                 {% if request.GET.q %}containing "{{ request.GET.q }}"{% endif %}
@@ -40,36 +41,37 @@
             {% for verse in verses %}
                 <div class="bg-white rounded-lg shadow p-6">
                     <h2 class="text-lg font-semibold mb-4">
-                        {% with ref=verse.ref|slice:"0:3" num=verse.ref|slice:"3:"|cut:"!"|cut:"1" %}
-                            {% if ref == "MAT" %}Matthew {{ num }}
-                            {% elif ref == "MRK" %}Mark {{ num }}
-                            {% elif ref == "LUK" %}Luke {{ num }}
-                            {% elif ref == "JHN" %}John {{ num }}
-                            {% elif ref == "ACT" %}Acts {{ num }}
-                            {% elif ref == "ROM" %}Romans {{ num }}
-                            {% elif ref == "1CO" %}1 Corinthians {{ num }}
-                            {% elif ref == "2CO" %}2 Corinthians {{ num }}
-                            {% elif ref == "GAL" %}Galatians {{ num }}
-                            {% elif ref == "EPH" %}Ephesians {{ num }}
-                            {% elif ref == "PHP" %}Philippians {{ num }}
-                            {% elif ref == "COL" %}Colossians {{ num }}
-                            {% elif ref == "1TH" %}1 Thessalonians {{ num }}
-                            {% elif ref == "2TH" %}2 Thessalonians {{ num }}
-                            {% elif ref == "1TI" %}1 Timothy {{ num }}
-                            {% elif ref == "2TI" %}2 Timothy {{ num }}
-                            {% elif ref == "TIT" %}Titus {{ num }}
-                            {% elif ref == "PHM" %}Philemon {{ num }}
-                            {% elif ref == "HEB" %}Hebrews {{ num }}
-                            {% elif ref == "JAS" %}James {{ num }}
-                            {% elif ref == "1PE" %}1 Peter {{ num }}
-                            {% elif ref == "2PE" %}2 Peter {{ num }}
-                            {% elif ref == "1JN" %}1 John {{ num }}
-                            {% elif ref == "2JN" %}2 John {{ num }}
-                            {% elif ref == "3JN" %}3 John {{ num }}
-                            {% elif ref == "JUD" %}Jude {{ num }}
-                            {% elif ref == "REV" %}Revelation {{ num }}
+                        {% with ref=verse.ref|slice:"0:3" ref_parts=verse.ref|cut:"!1"|split:":" %}
+                            {% if ref == "MAT" %}Matthew
+                            {% elif ref == "MRK" %}Mark
+                            {% elif ref == "LUK" %}Luke
+                            {% elif ref == "JHN" %}John
+                            {% elif ref == "ACT" %}Acts
+                            {% elif ref == "ROM" %}Romans
+                            {% elif ref == "1CO" %}1 Corinthians
+                            {% elif ref == "2CO" %}2 Corinthians
+                            {% elif ref == "GAL" %}Galatians
+                            {% elif ref == "EPH" %}Ephesians
+                            {% elif ref == "PHP" %}Philippians
+                            {% elif ref == "COL" %}Colossians
+                            {% elif ref == "1TH" %}1 Thessalonians
+                            {% elif ref == "2TH" %}2 Thessalonians
+                            {% elif ref == "1TI" %}1 Timothy
+                            {% elif ref == "2TI" %}2 Timothy
+                            {% elif ref == "TIT" %}Titus
+                            {% elif ref == "PHM" %}Philemon
+                            {% elif ref == "HEB" %}Hebrews
+                            {% elif ref == "JAS" %}James
+                            {% elif ref == "1PE" %}1 Peter
+                            {% elif ref == "2PE" %}2 Peter
+                            {% elif ref == "1JN" %}1 John
+                            {% elif ref == "2JN" %}2 John
+                            {% elif ref == "3JN" %}3 John
+                            {% elif ref == "JUD" %}Jude
+                            {% elif ref == "REV" %}Revelation
                             {% else %}{{ verse.ref }}
                             {% endif %}
+                            {{ ref_parts.0 }}:{{ ref_parts.1 }}
                         {% endwith %}
                     </h2>
 
