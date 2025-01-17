@@ -1,11 +1,9 @@
 from django.views.generic import ListView, TemplateView
 from django.db.models import Q
-from .models import Token
-
-from django.core.cache import cache
 from django.views.decorators.cache import cache_page
 from django.utils.decorators import method_decorator
 from django.conf import settings
+from .models import Token
 
 
 class HomeView(TemplateView):
@@ -20,45 +18,70 @@ class SearchView(ListView):
     model = Token
     template_name = "greek_nt/search_results.html"
     context_object_name = "verses"
-    paginate_by = 20
 
     def get_queryset(self):
         query = self.request.GET.get("q", "")
         if not query:
             return []
 
-        # First find matching tokens
-        matching_tokens = Token.objects.filter(
-            Q(text__icontains=query)
-            | Q(lemma__icontains=query)
-            | Q(english__icontains=query)
-            | Q(strong__icontains=query)
+        # Find matching verse IDs
+        matching_verses = set(
+            token.id[:9]
+            for token in Token.objects.filter(
+                Q(text__icontains=query)
+                | Q(lemma__icontains=query)
+                | Q(english__icontains=query)
+                | Q(strong__icontains=query)
+            )
         )
 
-        # Get unique verse identifiers from matching tokens
-        verse_ids = set()
-        for token in matching_tokens:
-            # Extract book, chapter, verse from token ID
-            verse_id = token.id[:9]  # First 9 digits identify the verse
-            verse_ids.add(verse_id)
+        # Get all tokens for matching verses
+        all_tokens = Token.objects.filter(
+            id__in=[
+                f"{verse_id}{i:03d}"
+                for verse_id in matching_verses
+                for i in range(1, 51)  # Max tokens per verse
+            ]
+        ).order_by("id")
 
-        # For each verse that has a match, get all its tokens
+        # Group into verses
         verses = []
-        for verse_id in verse_ids:
-            # Get all tokens for this verse using ID pattern
-            verse_tokens = Token.objects.filter(id__startswith=verse_id).order_by("id")
+        current_verse = []
+        current_matches = []
+        current_verse_id = None
 
-            # Get the matching tokens for this verse
-            verse_matches = matching_tokens.filter(id__startswith=verse_id)
+        for token in all_tokens:
+            verse_id = token.id[:9]
 
+            if verse_id != current_verse_id:
+                if current_verse:
+                    verses.append(
+                        {
+                            "ref": current_verse[0].ref,
+                            "tokens": current_verse,
+                            "matching_tokens": current_matches,
+                        }
+                    )
+                current_verse = []
+                current_matches = []
+                current_verse_id = verse_id
+
+            current_verse.append(token)
+            if (
+                query.lower() in token.text.lower()
+                or query.lower() in token.lemma.lower()
+                or query.lower() in token.english.lower()
+                or query.lower() in token.strong.lower()
+            ):
+                current_matches.append(token)
+
+        if current_verse:
             verses.append(
                 {
-                    "ref": verse_tokens.first().ref,  # Reference from first token
-                    "tokens": verse_tokens,
-                    "matching_tokens": verse_matches,
+                    "ref": current_verse[0].ref,
+                    "tokens": current_verse,
+                    "matching_tokens": current_matches,
                 }
             )
 
-        # Sort verses by reference
-        verses.sort(key=lambda x: x["tokens"].first().id)
         return verses

@@ -22,7 +22,11 @@
     </form>
 
     {% if verses %}
-        <div class="mb-6 flex justify-end">
+          <div class="mb-6 flex justify-between items-center">
+            <p class="text-sm text-gray-600">
+                Found {{ verses|length }} verse{{ verses|length|pluralize }}
+                {% if request.GET.q %}containing "{{ request.GET.q }}"{% endif %}
+            </p>
             <button 
                 onclick="toggleAllInterlinear()"
                 id="global-toggle"
