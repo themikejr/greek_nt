@@ -28,6 +28,7 @@ DEBUG = True
 
 # Update ALLOWED_HOSTS setting
 ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "").split(",")
+CSRF_TRUSTED_ORIGINS = ["https://greek-nt.fly.dev"]
 
 # Application definition
 INSTALLED_APPS = [
