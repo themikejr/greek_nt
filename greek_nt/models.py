@@ -52,10 +52,14 @@ class Token(models.Model):
     class Meta:
         db_table = "token"  # Explicitly set table name
         indexes = [
-            models.Index(fields=["text"]),  # Common lookup by reference
+            models.Index(fields=["text"]),
             models.Index(fields=["ref"]),  # Common lookup by reference
             models.Index(fields=["lemma"]),  # Common lookup by lemma
             models.Index(fields=["strong"]),  # Common lookup by Strong's number
+            models.Index(fields=["id"], name="token_id_prefix_idx"),
+            models.Index(
+                fields=["text", "lemma", "english", "strong"], name="token_search_idx"
+            ),
         ]
 
     def __str__(self):
