@@ -36,12 +36,34 @@
             {% for verse in verses %}
                 <div class="bg-white rounded-lg shadow p-6">
                     <h2 class="text-lg font-semibold mb-4">
-                        {% with ref_parts=verse.ref|slice:"4:" %}
-                            {% if verse.ref|slice:":3" == "MAT" %}Matthew{{ ref_parts }}
-                            {% elif verse.ref|slice:":3" == "MRK" %}Mark{{ ref_parts }}
-                            {% elif verse.ref|slice:":3" == "LUK" %}Luke{{ ref_parts }}
-                            {% elif verse.ref|slice:":3" == "JHN" %}John{{ ref_parts }}
-                            {% elif verse.ref|slice:":3" == "ACT" %}Acts{{ ref_parts }}
+                        {% with ref=verse.ref|slice:"0:3" num=verse.ref|slice:"3:"|cut:"!"|cut:"1" %}
+                            {% if ref == "MAT" %}Matthew {{ num }}
+                            {% elif ref == "MRK" %}Mark {{ num }}
+                            {% elif ref == "LUK" %}Luke {{ num }}
+                            {% elif ref == "JHN" %}John {{ num }}
+                            {% elif ref == "ACT" %}Acts {{ num }}
+                            {% elif ref == "ROM" %}Romans {{ num }}
+                            {% elif ref == "1CO" %}1 Corinthians {{ num }}
+                            {% elif ref == "2CO" %}2 Corinthians {{ num }}
+                            {% elif ref == "GAL" %}Galatians {{ num }}
+                            {% elif ref == "EPH" %}Ephesians {{ num }}
+                            {% elif ref == "PHP" %}Philippians {{ num }}
+                            {% elif ref == "COL" %}Colossians {{ num }}
+                            {% elif ref == "1TH" %}1 Thessalonians {{ num }}
+                            {% elif ref == "2TH" %}2 Thessalonians {{ num }}
+                            {% elif ref == "1TI" %}1 Timothy {{ num }}
+                            {% elif ref == "2TI" %}2 Timothy {{ num }}
+                            {% elif ref == "TIT" %}Titus {{ num }}
+                            {% elif ref == "PHM" %}Philemon {{ num }}
+                            {% elif ref == "HEB" %}Hebrews {{ num }}
+                            {% elif ref == "JAS" %}James {{ num }}
+                            {% elif ref == "1PE" %}1 Peter {{ num }}
+                            {% elif ref == "2PE" %}2 Peter {{ num }}
+                            {% elif ref == "1JN" %}1 John {{ num }}
+                            {% elif ref == "2JN" %}2 John {{ num }}
+                            {% elif ref == "3JN" %}3 John {{ num }}
+                            {% elif ref == "JUD" %}Jude {{ num }}
+                            {% elif ref == "REV" %}Revelation {{ num }}
                             {% else %}{{ verse.ref }}
                             {% endif %}
                         {% endwith %}
@@ -92,13 +114,11 @@ function updateInterlinearDisplay() {
     const urlParams = new URLSearchParams(window.location.search);
     const isShowingInterlinear = urlParams.get('interlinear') === 'true';
     
-    // Update button text
     const button = document.getElementById('global-toggle');
     if (button) {
         button.textContent = isShowingInterlinear ? 'Hide interlinear' : 'Show interlinear';
     }
     
-    // Update display of Greek text and interlinear views
     document.querySelectorAll('.greek-text').forEach(div => {
         div.classList.toggle('hidden', isShowingInterlinear);
     });
@@ -108,22 +128,18 @@ function updateInterlinearDisplay() {
     });
 }
 
-// Run on page load
 document.addEventListener('DOMContentLoaded', updateInterlinearDisplay);
 
 function toggleAllInterlinear() {
     const urlParams = new URLSearchParams(window.location.search);
     const isShowingInterlinear = urlParams.get('interlinear') === 'true';
     
-    // Preserve existing search query
     const searchQuery = urlParams.get('q');
     
-    // Create new URLSearchParams with required parameters
     const newParams = new URLSearchParams();
     if (searchQuery) newParams.set('q', searchQuery);
     newParams.set('interlinear', isShowingInterlinear ? 'false' : 'true');
     
-    // Update URL and reload page
     window.location.search = newParams.toString();
 }
 </script>
