@@ -86,10 +86,14 @@ WSGI_APPLICATION = "greek_nt.wsgi.application"
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": "/data/db.sqlite3"
+        "ENGINE": "django.db.backends.postgresql"
         if os.getenv("ENVIRONMENT") == "production"
-        else BASE_DIR / "db.sqlite3",
+        else "django.db.backends.sqlite3",
+        "NAME": os.getenv("SUPABASE_DB_NAME", BASE_DIR / "db.sqlite3"),
+        "USER": os.getenv("SUPABASE_DB_USER"),
+        "PASSWORD": os.getenv("SUPABASE_DB_PASSWORD"),
+        "HOST": os.getenv("SUPABASE_DB_HOST"),
+        "PORT": os.getenv("SUPABASE_DB_PORT", "5432"),
     }
 }
 

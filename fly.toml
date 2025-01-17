@@ -8,6 +8,11 @@ app = "greek-nt"
   DJANGO_ALLOWED_HOSTS = "gnt.mikebrinker.net,www.gnt.mikebrinker.net,greek-nt.fly.dev,localhost,0.0.0.0"
   ENVIRONMENT = "production"
   CSRF_TRUSTED_ORIGINS = "https://greek-nt.fly.dev,https://gnt.mikebrinker.net,https://www.gnt.mikebrinker.net"
+  SUPABASE_DB_NAME = "postgres"
+  SUPABASE_DB_USER = "postgres"
+  SUPABASE_DB_HOST = "db.gcetotafalmnyfhuuvch.supabase.co"
+  SUPABASE_DB_PORT = "5432"
+
 
 [http_service]
   internal_port = 8000
@@ -21,8 +26,7 @@ app = "greek-nt"
   guest_path = "/opt/greek-nt/src/staticfiles"
   url_prefix = "/static"
 
+
 [mounts]
   source = "greek_nt_data"
   destination = "/data"
-
-
