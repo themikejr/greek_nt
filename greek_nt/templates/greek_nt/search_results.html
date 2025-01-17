@@ -42,36 +42,35 @@
                 <div class="bg-white rounded-lg shadow p-6">
                     <h2 class="text-lg font-semibold mb-4">
                         {% with ref=verse.ref|slice:"0:3" ref_parts=verse.ref|cut:"!1"|split:":" %}
-                            {% if ref == "MAT" %}Matthew
-                            {% elif ref == "MRK" %}Mark
-                            {% elif ref == "LUK" %}Luke
-                            {% elif ref == "JHN" %}John
-                            {% elif ref == "ACT" %}Acts
-                            {% elif ref == "ROM" %}Romans
-                            {% elif ref == "1CO" %}1 Corinthians
-                            {% elif ref == "2CO" %}2 Corinthians
-                            {% elif ref == "GAL" %}Galatians
-                            {% elif ref == "EPH" %}Ephesians
-                            {% elif ref == "PHP" %}Philippians
-                            {% elif ref == "COL" %}Colossians
-                            {% elif ref == "1TH" %}1 Thessalonians
-                            {% elif ref == "2TH" %}2 Thessalonians
-                            {% elif ref == "1TI" %}1 Timothy
-                            {% elif ref == "2TI" %}2 Timothy
-                            {% elif ref == "TIT" %}Titus
-                            {% elif ref == "PHM" %}Philemon
-                            {% elif ref == "HEB" %}Hebrews
-                            {% elif ref == "JAS" %}James
-                            {% elif ref == "1PE" %}1 Peter
-                            {% elif ref == "2PE" %}2 Peter
-                            {% elif ref == "1JN" %}1 John
-                            {% elif ref == "2JN" %}2 John
-                            {% elif ref == "3JN" %}3 John
-                            {% elif ref == "JUD" %}Jude
-                            {% elif ref == "REV" %}Revelation
-                            {% else %}{{ verse.ref }}
-                            {% endif %}
-                            {{ ref_parts.0 }}:{{ ref_parts.1 }}
+                          {% if ref == "MAT" %}Matthew 
+                          {% elif ref == "MRK" %}Mark 
+                          {% elif ref == "LUK" %}Luke 
+                          {% elif ref == "JHN" %}John 
+                          {% elif ref == "ACT" %}Acts 
+                          {% elif ref == "ROM" %}Romans 
+                          {% elif ref == "1CO" %}1 Corinthians 
+                          {% elif ref == "2CO" %}2 Corinthians 
+                          {% elif ref == "GAL" %}Galatians 
+                          {% elif ref == "EPH" %}Ephesians 
+                          {% elif ref == "PHP" %}Philippians 
+                          {% elif ref == "COL" %}Colossians 
+                          {% elif ref == "1TH" %}1 Thessalonians 
+                          {% elif ref == "2TH" %}2 Thessalonians 
+                          {% elif ref == "1TI" %}1 Timothy 
+                          {% elif ref == "2TI" %}2 Timothy 
+                          {% elif ref == "TIT" %}Titus 
+                          {% elif ref == "PHM" %}Philemon 
+                          {% elif ref == "HEB" %}Hebrews 
+                          {% elif ref == "JAS" %}James 
+                          {% elif ref == "1PE" %}1 Peter 
+                          {% elif ref == "2PE" %}2 Peter 
+                          {% elif ref == "1JN" %}1 John 
+                          {% elif ref == "2JN" %}2 John 
+                          {% elif ref == "3JN" %}3 John
+                          {% elif ref == "JUD" %}Jude 
+                          {% elif ref == "REV" %}Revelation 
+                          {% endif %}
+                          {{ ref_parts.0|slice:"3:" }}:{{ ref_parts.1}}
                         {% endwith %}
                     </h2>
 
