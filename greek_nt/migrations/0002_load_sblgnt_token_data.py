@@ -6,16 +6,17 @@ import os
 
 def load_token_data(apps, schema_editor):
     Token = apps.get_model("greek_nt", "Token")
-
     data_file_path = os.path.join(
         os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
         "data",
         "macula-greek-sblgnt.tsv",
     )
 
+    batch = []
+    batch_size = 100  # Smaller batch size for memory efficiency
+
     with open(data_file_path, "r", encoding="utf-8") as file:
         reader = csv.DictReader(file, delimiter="\t")
-        tokens = []
         for row in reader:
             # Handle the class field specially since it's a reserved word
             class_value = row.pop("class", "")
@@ -50,10 +51,15 @@ def load_token_data(apps, schema_editor):
                 subjref=row["subjref"],
                 referent=row["referent"],
             )
-            tokens.append(token)
+            batch.append(token)
 
-        # Bulk create all tokens
-        Token.objects.bulk_create(tokens, batch_size=1000)
+            if len(batch) >= batch_size:
+                Token.objects.bulk_create(batch)
+                batch.clear()
+
+        # Create any remaining tokens
+        if batch:
+            Token.objects.bulk_create(batch)
 
 
 def reverse_migration(apps, schema_editor):
