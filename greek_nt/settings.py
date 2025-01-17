@@ -12,6 +12,9 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 import os
 from pathlib import Path
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -84,16 +87,36 @@ WSGI_APPLICATION = "greek_nt.wsgi.application"
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.postgresql"
+#         if os.getenv("ENVIRONMENT") == "production"
+#         else "django.db.backends.sqlite3",
+#         "NAME": os.getenv("SUPABASE_DB_NAME", BASE_DIR / "db.sqlite3"),
+#         "USER": os.getenv("SUPABASE_DB_USER"),
+#         "PASSWORD": os.getenv("SUPABASE_DB_PASSWORD"),
+#         "HOST": os.getenv("SUPABASE_DB_HOST"),
+#         "PORT": os.getenv("SUPABASE_DB_PORT", "5432"),
+#         "OPTIONS": {"sslmode": "require"}
+#         if os.getenv("ENVIRONMENT") == "production"
+#         else {},
+#     }
+# }
+
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.postgresql"
+        "ENGINE": "django.db.backends.sqlite3"
+        if os.getenv("ENVIRONMENT") != "production"
+        else "django.db.backends.postgresql",
+        "NAME": BASE_DIR / "db.sqlite3"
+        if os.getenv("ENVIRONMENT") != "production"
+        else "postgres",
+        "OPTIONS": {
+            "service": None,
+        },
+        "DATABASE_URL": f"postgres://postgres:{os.getenv('SUPABASE_DB_PASSWORD')}@db.gcetotafalmnyfhuuvch.supabase.co:5432/postgres?sslmode=require"
         if os.getenv("ENVIRONMENT") == "production"
-        else "django.db.backends.sqlite3",
-        "NAME": os.getenv("SUPABASE_DB_NAME", BASE_DIR / "db.sqlite3"),
-        "USER": os.getenv("SUPABASE_DB_USER"),
-        "PASSWORD": os.getenv("SUPABASE_DB_PASSWORD"),
-        "HOST": os.getenv("SUPABASE_DB_HOST"),
-        "PORT": os.getenv("SUPABASE_DB_PORT", "5432"),
+        else None,
     }
 }
 
