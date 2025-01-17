@@ -1,6 +1,8 @@
-from django.views.generic import ListView, TemplateView
+from django.views.generic import ListView, TemplateView, View
+from django.shortcuts import render
 from django.core.paginator import Paginator
-from django.db.models import Q
+from django.db.models import Q, Count, F, Value, Func, CharField
+from django.db.models.functions import Substr
 from django.views.decorators.cache import cache_page
 from django.utils.decorators import method_decorator
 from django.conf import settings
@@ -15,80 +17,66 @@ class HomeView(TemplateView):
     cache_page(86400) if settings.ENVIRONMENT == "production" else lambda x: x,
     name="dispatch",
 )
-class SearchView(ListView):
-    model = Token
+class SearchView(View):
     template_name = "greek_nt/search_results.html"
-    context_object_name = "verses"
     paginate_by = 20
 
-    def get_queryset(self):
-        query = self.request.GET.get("q", "")
+    def get(self, request):
+        query = request.GET.get("q", "")
         if not query:
-            return []
+            return render(request, self.template_name)
 
-        # Find matching verse IDs with pagination
-        matching_tokens = Token.objects.filter(
-            Q(text__icontains=query)
-            | Q(lemma__icontains=query)
-            | Q(english__icontains=query)
-            | Q(strong__icontains=query)
-        ).values_list("id", flat=True)
-
-        # Get unique verse IDs (first 9 chars of token ID)
-        verse_ids = {token_id[:9] for token_id in matching_tokens}
-
-        # Get all tokens for matching verses
-        all_tokens = Token.objects.filter(
-            id__in=[
-                f"{verse_id}{i:03d}"
-                for verse_id in verse_ids
-                for i in range(1, 51)  # Max tokens per verse
-            ]
-        ).order_by("id")
-
-        # Group into verses
-        verses = []
-        current_verse = []
-        current_matches = []
-        current_verse_id = None
-
-        for token in all_tokens:
-            verse_id = token.id[:9]
-
-            if verse_id != current_verse_id:
-                if current_verse:
-                    verses.append(
-                        {
-                            "ref": current_verse[0].ref,
-                            "tokens": current_verse,
-                            "matching_tokens": current_matches,
-                        }
-                    )
-                current_verse = []
-                current_matches = []
-                current_verse_id = verse_id
-
-            current_verse.append(token)
-            if (
-                query.lower() in token.text.lower()
-                or query.lower() in token.lemma.lower()
-                or query.lower() in token.english.lower()
-                or query.lower() in token.strong.lower()
-            ):
-                current_matches.append(token)
-
-        if current_verse:
-            verses.append(
-                {
-                    "ref": current_verse[0].ref,
-                    "tokens": current_verse,
-                    "matching_tokens": current_matches,
-                }
+        # Get matching verse IDs
+        verse_ids = (
+            Token.objects.filter(
+                Q(text__icontains=query)
+                | Q(lemma__icontains=query)
+                | Q(english__icontains=query)
+                | Q(strong__icontains=query)
             )
+            .annotate(verse_id=Substr("id", 1, 9))
+            .values("verse_id")
+            .distinct()
+            .order_by("verse_id")
+        )
 
-        return verses
+        # Set up pagination
+        paginator = Paginator(verse_ids, self.paginate_by)
+        page_number = request.GET.get("page", 1)
+        page = paginator.get_page(page_number)
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["total_results"] = len(self.get_queryset())
-        return context
+        # Fetch tokens only for current page's verses
+        verses = []
+        for verse in page:
+            verse_id = verse["verse_id"]
+            tokens = Token.objects.filter(id__startswith=verse_id).order_by("id")
+
+            if tokens:
+                matching_tokens = [
+                    token
+                    for token in tokens
+                    if (
+                        query.lower() in token.text.lower()
+                        or query.lower() in token.lemma.lower()
+                        or query.lower() in token.english.lower()
+                        or query.lower() in token.strong.lower()
+                    )
+                ]
+
+                verses.append(
+                    {
+                        "ref": tokens[0].ref,
+                        "tokens": tokens,
+                        "matching_tokens": matching_tokens,
+                    }
+                )
+
+        context = {
+            "verses": verses,
+            "paginator": paginator,
+            "page_obj": page,
+            "is_paginated": paginator.num_pages > 1,
+            "total_results": paginator.count,
+        }
+
+        return render(request, self.template_name, context)
