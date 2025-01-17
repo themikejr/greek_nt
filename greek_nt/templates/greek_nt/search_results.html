@@ -4,7 +4,6 @@
 
 {% block content %}
 <div class="max-w-3xl mx-auto">
-    {# Search form remains the same #}
     <form action="{% url 'greek_nt:search' %}" method="get" class="mb-8">
         <div class="flex gap-4">
             <input 
@@ -23,7 +22,6 @@
     </form>
 
     {% if verses %}
-        {# Global interlinear toggle #}
         <div class="mb-6 flex justify-end">
             <button 
                 onclick="toggleAllInterlinear()"
@@ -50,7 +48,6 @@
                     </h2>
 
                     <div class="verse-content">
-                        {# Greek text only - visible by default #}
                         <div class="greek-text text-lg">
                             {% for token in verse.tokens %}
                                 <span class="{% if token in verse.matching_tokens %}bg-yellow-200{% endif %}">
@@ -59,7 +56,6 @@
                             {% endfor %}
                         </div>
 
-                        {# Interlinear view - hidden by default #}
                         <div class="interlinear-view hidden">
                             <div class="flex flex-wrap gap-x-1 gap-y-3">
                                 {% for token in verse.tokens %}
@@ -76,38 +72,59 @@
                 </div>
             {% endfor %}
         </div>
-{% else %}
-    {% if request.GET.q %}
-        <div class="bg-white rounded-lg shadow p-8 text-center">
-            <h2 class="text-xl font-semibold text-gray-900 mb-2">No results found</h2>
-            <p class="text-gray-600 mb-4">
-                No matches found for "{{ request.GET.q }}"
-            </p>
-            <p class="text-sm text-gray-500">
-                Try adjusting your search term or checking the spelling
-            </p>
-        </div>
-{% endif %}
+    {% else %}
+        {% if request.GET.q %}
+            <div class="bg-white rounded-lg shadow p-8 text-center">
+                <h2 class="text-xl font-semibold text-gray-900 mb-2">No results found</h2>
+                <p class="text-gray-600 mb-4">
+                    No matches found for "{{ request.GET.q }}"
+                </p>
+                <p class="text-sm text-gray-500">
+                    Try adjusting your search term or checking the spelling
+                </p>
+            </div>
+        {% endif %}
     {% endif %}
 </div>
 
 <script>
-function toggleAllInterlinear() {
+function updateInterlinearDisplay() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const isShowingInterlinear = urlParams.get('interlinear') === 'true';
+    
+    // Update button text
     const button = document.getElementById('global-toggle');
-    const greekTexts = document.querySelectorAll('.greek-text');
-    const interlinearViews = document.querySelectorAll('.interlinear-view');
+    if (button) {
+        button.textContent = isShowingInterlinear ? 'Hide interlinear' : 'Show interlinear';
+    }
     
-    const isShowingInterlinear = button.textContent === 'Hide interlinear';
-    
-    greekTexts.forEach(div => {
-        div.classList.toggle('hidden', !isShowingInterlinear);
-    });
-    
-    interlinearViews.forEach(div => {
+    // Update display of Greek text and interlinear views
+    document.querySelectorAll('.greek-text').forEach(div => {
         div.classList.toggle('hidden', isShowingInterlinear);
     });
     
-    button.textContent = isShowingInterlinear ? 'Show interlinear' : 'Hide interlinear';
+    document.querySelectorAll('.interlinear-view').forEach(div => {
+        div.classList.toggle('hidden', !isShowingInterlinear);
+    });
+}
+
+// Run on page load
+document.addEventListener('DOMContentLoaded', updateInterlinearDisplay);
+
+function toggleAllInterlinear() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const isShowingInterlinear = urlParams.get('interlinear') === 'true';
+    
+    // Preserve existing search query
+    const searchQuery = urlParams.get('q');
+    
+    // Create new URLSearchParams with required parameters
+    const newParams = new URLSearchParams();
+    if (searchQuery) newParams.set('q', searchQuery);
+    newParams.set('interlinear', isShowingInterlinear ? 'false' : 'true');
+    
+    // Update URL and reload page
+    window.location.search = newParams.toString();
 }
 </script>
 {% endblock %}
