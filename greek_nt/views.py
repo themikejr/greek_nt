@@ -1,17 +1,10 @@
 from django.views.generic import ListView, TemplateView
-from django import template
+from django.core.paginator import Paginator
 from django.db.models import Q
 from django.views.decorators.cache import cache_page
 from django.utils.decorators import method_decorator
 from django.conf import settings
 from .models import Token
-
-# register = template.Library()
-
-
-# @register.filter
-# def split(value, separator):
-#     return value.split(separator)
 
 
 class HomeView(TemplateView):
@@ -26,28 +19,29 @@ class SearchView(ListView):
     model = Token
     template_name = "greek_nt/search_results.html"
     context_object_name = "verses"
+    paginate_by = 20
 
     def get_queryset(self):
         query = self.request.GET.get("q", "")
         if not query:
             return []
 
-        # Find matching verse IDs
-        matching_verses = set(
-            token.id[:9]
-            for token in Token.objects.filter(
-                Q(text__icontains=query)
-                | Q(lemma__icontains=query)
-                | Q(english__icontains=query)
-                | Q(strong__icontains=query)
-            )
-        )
+        # Find matching verse IDs with pagination
+        matching_tokens = Token.objects.filter(
+            Q(text__icontains=query)
+            | Q(lemma__icontains=query)
+            | Q(english__icontains=query)
+            | Q(strong__icontains=query)
+        ).values_list("id", flat=True)
+
+        # Get unique verse IDs (first 9 chars of token ID)
+        verse_ids = {token_id[:9] for token_id in matching_tokens}
 
         # Get all tokens for matching verses
         all_tokens = Token.objects.filter(
             id__in=[
                 f"{verse_id}{i:03d}"
-                for verse_id in matching_verses
+                for verse_id in verse_ids
                 for i in range(1, 51)  # Max tokens per verse
             ]
         ).order_by("id")
@@ -93,3 +87,8 @@ class SearchView(ListView):
             )
 
         return verses
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["total_results"] = len(self.get_queryset())
+        return context

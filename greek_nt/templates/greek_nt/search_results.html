@@ -25,7 +25,7 @@
     {% if verses %}
         <div class="mb-6 flex justify-between items-center">
             <p class="text-sm text-gray-600">
-                Found {{ verses|length }} verse{{ verses|length|pluralize }}
+                Found {{ paginator.count }} verse{{ verses|length|pluralize }}
                 {% if request.GET.q %}containing "{{ request.GET.q }}"{% endif %}
             </p>
             <button 
@@ -99,6 +99,47 @@
                     </div>
                 </div>
             {% endfor %}
+{% if is_paginated %}
+<nav aria-label="Page navigation" class="my-8">
+    <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2">
+            <p class="text-sm text-gray-700">
+                Showing verses {{ page_obj.start_index }}-{{ page_obj.end_index }}
+                of {{ paginator.count }}
+            </p>
+        </div>
+        
+        <div class="flex items-center gap-2">
+            {% if page_obj.has_previous %}
+                <a href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}page={{ page_obj.previous_page_number }}{% if request.GET.interlinear %}&interlinear={{ request.GET.interlinear }}{% endif %}" 
+                   class="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+                    Previous
+                </a>
+            {% endif %}
+            
+            {% for num in paginator.page_range %}
+                {% if num == page_obj.number %}
+                    <span class="px-3 py-2 text-sm font-medium text-blue-600 bg-blue-50 border border-blue-300 rounded-md">
+                        {{ num }}
+                    </span>
+                {% elif num|add:"-2" <= page_obj.number and num|add:"2" >= page_obj.number %}
+                    <a href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}page={{ num }}{% if request.GET.interlinear %}&interlinear={{ request.GET.interlinear }}{% endif %}"
+                       class="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+                        {{ num }}
+                    </a>
+                {% endif %}
+            {% endfor %}
+            
+            {% if page_obj.has_next %}
+                <a href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}page={{ page_obj.next_page_number }}{% if request.GET.interlinear %}&interlinear={{ request.GET.interlinear }}{% endif %}"
+                   class="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+                    Next
+                </a>
+            {% endif %}
+        </div>
+    </div>
+</nav>
+{% endif %}
         </div>
     {% else %}
         {% if request.GET.q %}
@@ -141,9 +182,11 @@ function toggleAllInterlinear() {
     const isShowingInterlinear = urlParams.get('interlinear') === 'true';
     
     const searchQuery = urlParams.get('q');
+    const page = urlParams.get('page');
     
     const newParams = new URLSearchParams();
     if (searchQuery) newParams.set('q', searchQuery);
+    if (page) newParams.set('page', page);
     newParams.set('interlinear', isShowingInterlinear ? 'false' : 'true');
     
     window.location.search = newParams.toString();
