@@ -69,9 +69,10 @@ RUN mkdir -p /opt/greek-nt/src/staticfiles && \
 
 # Create a script to run migrations and start the server
 RUN echo '#!/bin/bash\n\
-set -e\n\
-/opt/greek-nt/src/.venv/bin/python manage.py migrate --noinput 2>&1 | tee /data/migration.log\n\
-/opt/greek-nt/src/.venv/bin/gunicorn --bind 0.0.0.0:8000 greek_nt.wsgi:application' > /opt/greek-nt/src/start.sh
+/opt/greek-nt/src/.venv/bin/python manage.py migrate --noinput\n\
+/opt/greek-nt/src/.venv/bin/gunicorn --bind 0.0.0.0:8000 greek_nt.wsgi:application' > /opt/greek-nt/src/start.sh && \
+chmod +x /opt/greek-nt/src/start.sh && \
+chown app:app /opt/greek-nt/src/start.sh
 
 # Expose the application port
 EXPOSE 8000
