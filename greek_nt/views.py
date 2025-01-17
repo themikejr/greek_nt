@@ -2,11 +2,20 @@ from django.views.generic import ListView, TemplateView
 from django.db.models import Q
 from .models import Token
 
+from django.core.cache import cache
+from django.views.decorators.cache import cache_page
+from django.utils.decorators import method_decorator
+from django.conf import settings
+
 
 class HomeView(TemplateView):
     template_name = "greek_nt/home.html"
 
 
+@method_decorator(
+    cache_page(86400) if settings.ENVIRONMENT == "production" else lambda x: x,
+    name="dispatch",
+)
 class SearchView(ListView):
     model = Token
     template_name = "greek_nt/search_results.html"

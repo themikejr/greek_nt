@@ -16,6 +16,7 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+ENVIRONMENT = os.getenv("ENVIRONMENT", "development")
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
@@ -90,6 +91,16 @@ DATABASES = {
         if os.getenv("ENVIRONMENT") == "production"
         else BASE_DIR / "db.sqlite3",
     }
+}
+
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "LOCATION": "greek_nt_cache",
+        "TIMEOUT": 86400,  # 24 hours
+    }
+    if ENVIRONMENT == "production"
+    else {"BACKEND": "django.core.cache.backends.dummy.DummyCache"}
 }
 
 
