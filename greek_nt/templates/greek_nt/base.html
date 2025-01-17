@@ -1,27 +1,29 @@
-{# greek_nt/templates/greek_nt/base.html #}
 <!doctype html>
-<html lang="en">
+<html lang="en" class="h-full">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
     <title>{% block title %}Greek NT{% endblock %}</title>
     <script src="https://cdn.tailwindcss.com"></script>
   </head>
-  <body class="bg-gray-50">
-    <nav class="bg-white shadow">
-      <div class="max-w-7xl mx-auto px-4">
-        <div class="flex justify-between h-16">
-          <div class="flex">
-            <a href="{% url 'greek_nt:home' %}" class="flex items-center">
-              <span class="text-xl font-bold">Greek NT</span>
-            </a>
+  <body class="min-h-full bg-gray-50">
+    <nav class="sticky top-0 z-20 bg-white shadow">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="flex h-16 justify-between">
+          <div class="flex flex-shrink-0 items-center">
+            <a href="{% url 'greek_nt:home' %}" class="text-xl font-bold">Greek NT</a>
+          </div>
+          <div class="flex items-center">
+            <a href="{% url 'greek_nt:home' %}" class="text-gray-600 hover:text-gray-900 px-3 py-2 text-sm font-medium">Home</a>
           </div>
         </div>
       </div>
     </nav>
 
-    <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-      {% block content %}{% endblock %}
+    <main class="relative">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
+        {% block content %}{% endblock %}
+      </div>
     </main>
   </body>
 </html>
