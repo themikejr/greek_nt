@@ -7,7 +7,7 @@ class Token(models.Model):
 
     # Reference and role fields
     ref = models.CharField(max_length=20)  # e.g., "MAT 1:1!1"
-    role = models.CharField(max_length=1, blank=True)  # e.g., "s", "v"
+    role = models.CharField(max_length=10, blank=True)  # Changed from max_length=1
 
     # Classification fields
     class_field = models.CharField(
