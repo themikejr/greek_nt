@@ -20,25 +20,41 @@
 
 		{% tailwind_css %}
 </head>
-
-  <body class="min-h-full bg-gray-50">
+  <body class="min-h-screen bg-gray-50 flex flex-col">
     <nav class="sticky top-0 z-20 bg-white shadow">
-      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div class="flex h-16 justify-between">
-          <div class="flex flex-shrink-0 items-center">
-            <a href="{% url 'greek_nt:home' %}" class="text-xl font-bold">Greek NT</a>
-          </div>
-          <div class="flex items-center">
-            <a href="{% url 'greek_nt:home' %}" class="text-gray-600 hover:text-gray-900 px-3 py-2 text-sm font-medium">Home</a>
-          </div>
+<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="flex h-16 justify-between">
+                <div class="flex flex-shrink-0 items-center">
+                    <a href="{% url 'greek_nt:home' %}" class="text-xl font-bold">Greek NT</a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="{% url 'greek_nt:home' %}" class="text-gray-600 hover:text-gray-900 px-3 py-2 text-sm font-medium">Home</a>
+                    <a href="{% url 'greek_nt:about' %}" class="text-gray-600 hover:text-gray-900 px-3 py-2 text-sm font-medium">About</a>
+                </div>
+            </div>
         </div>
       </div>
     </nav>
-
-    <main class="relative">
+    
+    <main class="flex-grow">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
         {% block content %}{% endblock %}
       </div>
     </main>
+
+  <footer class="mt-auto py-6 bg-white border-t border-gray-200">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center text-sm text-gray-600">
+            <div>
+                © {% now "Y" %} Greek NT Search
+            </div>
+            <div>
+                Powered by SBLGNT and MACULA Greek data. 
+                <a href="{% url 'greek_nt:about' %}" class="text-blue-600 hover:underline">Learn more</a>
+            </div>
+        </div>
+    </div>
+</footer>
+
   </body>
 </html>

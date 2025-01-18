@@ -13,6 +13,10 @@ class HomeView(TemplateView):
     template_name = "greek_nt/home.html"
 
 
+class AboutView(TemplateView):
+    template_name = "greek_nt/about.html"
+
+
 @method_decorator(
     cache_page(86400) if settings.ENVIRONMENT == "production" else lambda x: x,
     name="dispatch",

@@ -1,0 +1,248 @@
+{% extends "greek_nt/base.html" %} {% block title %}About - Greek NT Search{%
+endblock %} {% block og_description %}Learn about the Greek NT Search tool, its
+data sources, and technical details.{% endblock %} {% block twitter_description
+%}{{ block.super }}{% endblock %} {% block content %}
+<div class="max-w-3xl mx-auto">
+  <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-8 mb-8">
+    <h1 class="text-3xl font-bold text-gray-900 mb-6">About Greek NT Search</h1>
+
+    <p class="text-lg text-gray-600 mb-8">
+      Greek NT Search is a tool for searching and studying the Greek New
+      Testament. It provides instant search across Greek text, English glosses,
+      and Strong's numbers, with interlinear viewing options.
+    </p>
+
+    <div class="space-y-12">
+      <section>
+        <h2 class="text-2xl font-semibold text-gray-900 mb-6">
+          Text and Data Sources
+        </h2>
+
+        <div class="space-y-8">
+          <div>
+            <h3 class="text-xl font-medium text-gray-900 mb-3">
+              SBL Greek New Testament
+            </h3>
+            <p class="text-gray-600">
+              This site uses the
+              <a href="https://sblgnt.com" class="text-blue-600 hover:underline"
+                >SBL Greek New Testament</a
+              >, a critically edited text by Michael W. Holmes, produced through
+              collaboration between the Society of Biblical Literature and Logos
+              Bible Software. The SBLGNT represents a significant scholarly
+              achievement, differing from the Nestle-Aland/United Bible
+              Societies text in more than 540 variation units.
+            </p>
+          </div>
+
+          <div>
+            <h3 class="text-xl font-medium text-gray-900 mb-3">
+              MACULA Greek Linguistic Datasets
+            </h3>
+            <p class="text-gray-600 mb-4">
+              The linguistic data (morphology, glosses, etc.) comes from the
+              <a
+                href="https://github.com/Clear-Bible/macula-greek"
+                class="text-blue-600 hover:underline"
+                >MACULA Greek Linguistic Datasets</a
+              >. This comprehensive dataset combines the SBLGNT with:
+            </p>
+            <ul class="grid grid-cols-1 md:grid-cols-2 gap-3 text-gray-600">
+              <li class="flex items-start">
+                <svg
+                  class="w-5 h-5 text-green-500 mt-1 mr-2"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M5 13l4 4L19 7"
+                  ></path>
+                </svg>
+                Morphological analysis
+              </li>
+              <li class="flex items-start">
+                <svg
+                  class="w-5 h-5 text-green-500 mt-1 mr-2"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M5 13l4 4L19 7"
+                  ></path>
+                </svg>
+                English glosses from the Berean Study Bible
+              </li>
+              <li class="flex items-start">
+                <svg
+                  class="w-5 h-5 text-green-500 mt-1 mr-2"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M5 13l4 4L19 7"
+                  ></path>
+                </svg>
+                Word sense data from the UBS MARBLE project
+              </li>
+              <li class="flex items-start">
+                <svg
+                  class="w-5 h-5 text-green-500 mt-1 mr-2"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M5 13l4 4L19 7"
+                  ></path>
+                </svg>
+                Semantic roles and participant referents
+              </li>
+              <li class="flex items-start">
+                <svg
+                  class="w-5 h-5 text-green-500 mt-1 mr-2"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M5 13l4 4L19 7"
+                  ></path>
+                </svg>
+                Syntax trees and linguistic annotations
+              </li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2 class="text-2xl font-semibold text-gray-900 mb-6">
+          Licenses and Attribution
+        </h2>
+        <div class="bg-gray-50 rounded-lg p-6 space-y-4 border border-gray-200">
+          <div>
+            <p class="font-medium text-gray-900 mb-1">SBLGNT</p>
+            <p class="text-sm text-gray-600">
+              © 2010 Society of Biblical Literature and Logos Bible Software<br />
+              Licensed under
+              <a
+                href="https://creativecommons.org/licenses/by/4.0/"
+                class="text-blue-600 hover:underline"
+                >Creative Commons Attribution 4.0 International</a
+              >
+            </p>
+          </div>
+          <div>
+            <p class="font-medium text-gray-900 mb-1">
+              MACULA Greek Linguistic Datasets
+            </p>
+            <p class="text-sm text-gray-600">
+              © 2022-2024 by Biblica, Inc.<br />
+              Licensed under
+              <a
+                href="https://creativecommons.org/licenses/by/4.0/"
+                class="text-blue-600 hover:underline"
+                >Creative Commons Attribution 4.0 International</a
+              >
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2 class="text-2xl font-semibold text-gray-900 mb-6">
+          Technical Details
+        </h2>
+        <p class="text-gray-600 mb-4">
+          This is an open-source project built with Django and Tailwind CSS. The
+          search functionality provides:
+        </p>
+        <ul class="grid grid-cols-1 md:grid-cols-2 gap-3 text-gray-600">
+          <li class="flex items-start">
+            <svg
+              class="w-5 h-5 text-blue-500 mt-1 mr-2"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M5 13l4 4L19 7"
+              ></path>
+            </svg>
+            Full-text search across Greek text, lemmas, and English glosses
+          </li>
+          <li class="flex items-start">
+            <svg
+              class="w-5 h-5 text-blue-500 mt-1 mr-2"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M5 13l4 4L19 7"
+              ></path>
+            </svg>
+            Strong's number lookup
+          </li>
+          <li class="flex items-start">
+            <svg
+              class="w-5 h-5 text-blue-500 mt-1 mr-2"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M5 13l4 4L19 7"
+              ></path>
+            </svg>
+            Interlinear display with morphological information
+          </li>
+          <li class="flex items-start">
+            <svg
+              class="w-5 h-5 text-blue-500 mt-1 mr-2"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M5 13l4 4L19 7"
+              ></path>
+            </svg>
+            Fast, cached results with pagination
+          </li>
+        </ul>
+      </section>
+    </div>
+  </div>
+</div>
+{% endblock %}
