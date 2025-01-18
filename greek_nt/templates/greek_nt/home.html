@@ -11,18 +11,18 @@
     <p class="text-lg text-gray-600">Search across Greek text, English glosses, and Strong's numbers</p>
   </div>
 
-  <form action="{% url 'greek_nt:search' %}" method="get" class="mb-8">
-    <div class="flex gap-4">
+  <form action="{% url 'greek_nt:search' %}" method="get" class="mb-8 px-4 sm:px-0">
+    <div class="flex gap-2 sm:gap-4">
       <input
         type="search"
         name="q"
         id="search-input"
         placeholder="Type your search term..."
-        class="flex-1 rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-4 text-lg"
+        class="flex-1 rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-3 sm:p-4 text-base sm:text-lg"
       />
       <button
         type="submit"
-        class="bg-blue-600 text-white px-6 py-4 rounded-lg hover:bg-blue-700 text-lg font-medium"
+        class="bg-blue-600 text-white px-4 sm:px-6 py-3 sm:py-4 rounded-lg hover:bg-blue-700 text-base sm:text-lg font-medium whitespace-nowrap"
       >
         Search
       </button>
