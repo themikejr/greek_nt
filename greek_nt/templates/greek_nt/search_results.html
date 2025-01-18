@@ -1,7 +1,33 @@
 {% extends "greek_nt/base.html" %}
 {% load greek_nt_extras %}
 
-{% block title %}Search Results{% endblock %}
+{% block title %}
+{% if request.GET.q %}
+    {% if verses %}
+        Greek NT Search: "{{ request.GET.q }}" ({{ paginator.count }})
+    {% else %}
+        Greek NT Search: "{{ request.GET.q }}" (No Results)
+    {% endif %}
+{% else %}
+    Greek NT Search
+{% endif %}
+{% endblock %}
+
+{# Add custom description for search results #}
+{% block og_description %}
+{% if request.GET.q %}
+    {% if verses %}
+        Search results for "{{ request.GET.q }}" in the Greek New Testament. Found {{ paginator.count }} verse{{ paginator.count|pluralize }}.
+    {% else %}
+        No results found for "{{ request.GET.q }}" in the Greek New Testament.
+    {% endif %}
+{% else %}
+    Search the Greek New Testament by Greek text, English glosses, or Strong's numbers
+{% endif %}
+{% endblock %}
+
+{# Use the same description for Twitter #}
+{% block twitter_description %}{{ block.super }}{% endblock %}
 
 {% block content %}
 <div class="max-w-3xl mx-auto">

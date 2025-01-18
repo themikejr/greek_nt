@@ -1,11 +1,24 @@
 <!doctype html>
 <html lang="en" class="h-full">
-  <head>
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
     <title>{% block title %}Greek NT{% endblock %}</title>
+
+    <!-- Open Graph / Social Meta Tags -->
+    <meta property="og:site_name" content="Greek NT" />
+    <meta property="og:title" content="{% block og_title %}{{ block.super }}{% endblock %}" />
+    <meta property="og:description" content="{% block og_description %}Search the Greek New Testament by Greek text, English glosses, or Strong's numbers{% endblock %}" />
+    <meta property="og:type" content="website" />
+    
+    <!-- Twitter-specific cards -->
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="{% block twitter_title %}{{ block.super }}{% endblock %}" />
+    <meta name="twitter:description" content="{% block twitter_description %}Search the Greek New Testament by Greek text, English glosses, or Strong's numbers{% endblock %}" />
+
     <script src="https://cdn.tailwindcss.com"></script>
-  </head>
+</head>
+
   <body class="min-h-full bg-gray-50">
     <nav class="sticky top-0 z-20 bg-white shadow">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
