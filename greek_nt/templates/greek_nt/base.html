@@ -18,7 +18,9 @@
     <meta name="twitter:title" content="{% block twitter_title %}{{ block.super }}{% endblock %}" />
     <meta name="twitter:description" content="{% block twitter_description %}Search the Greek New Testament by Greek text, English glosses, or Strong's numbers{% endblock %}" />
 
-		{% tailwind_css %}
+    {% tailwind_css %}
+    
+    {% block extra_head %}{% endblock %}
 </head>
   <body class="min-h-screen bg-gray-50 flex flex-col">
     <nav class="sticky top-0 z-20 bg-white shadow">
@@ -49,7 +51,7 @@
                 © {% now "Y" %} Greek NT Search
             </div>
             <div>
-                Powered by SBLGNT and MACULA Greek data. 
+                Powered by really good data. 
                 <a href="{% url 'greek_nt:about' %}" class="text-blue-600 hover:underline">Learn more</a>
             </div>
         </div>

@@ -29,6 +29,98 @@
 {# Use the same description for Twitter #}
 {% block twitter_description %}{{ block.super }}{% endblock %}
 
+{% block extra_head %}
+<style>
+    .word-token {
+        cursor: pointer;
+        position: relative;
+    }
+    
+    .word-token:hover {
+        text-decoration: underline;
+    }
+    
+    /* Definition drawer styles */
+    .definition-drawer {
+        display: none;
+        position: fixed;
+        z-index: 50;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+        background-color: white;
+        box-shadow: 0 -4px 6px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease-in-out;
+        transform: translateY(100%);
+        border-top-left-radius: 0.75rem;
+        border-top-right-radius: 0.75rem;
+        max-height: 85vh; /* Increased from 70vh */
+        overflow-y: auto;
+    }
+    
+    .definition-drawer.active {
+        display: block;
+        transform: translateY(0);
+    }
+    
+    .definition-drawer-content {
+        padding: 1.5rem;
+        position: relative;
+    }
+    
+    .drawer-handle {
+        width: 50px;
+        height: 4px;
+        background-color: #cbd5e0;
+        border-radius: 2px;
+        margin: 0.5rem auto;
+        cursor: pointer;
+    }
+    
+    .close-drawer {
+        position: absolute;
+        top: 0.75rem;
+        right: 0.75rem;
+        color: #aaa;
+        font-size: 1.5rem;
+        font-weight: bold;
+        cursor: pointer;
+    }
+    
+    .close-drawer:hover,
+    .close-drawer:focus {
+        color: black;
+    }
+    
+    /* Desktop card */
+    @media (min-width: 768px) {
+        .definition-drawer {
+            max-width: 400px;
+            left: auto;
+            right: 2rem;
+            bottom: 2rem;
+            border-radius: 0.5rem;
+            transform: translateY(0) scale(0.95);
+            opacity: 0;
+            transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            max-height: 500px;
+        }
+        
+        .definition-drawer.active {
+            transform: translateY(0) scale(1);
+            opacity: 1;
+        }
+    }
+    
+    /* Ensure glosses and definitions don't overflow */
+    .definition-glosses, .definition-text {
+        word-break: break-word;
+        overflow-wrap: break-word;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="max-w-3xl mx-auto">
     <form action="{% url 'greek_nt:search' %}" method="get" class="mb-8">
@@ -103,9 +195,12 @@
                     <div class="verse-content">
                         <div class="greek-text text-lg">
                             {% for token in verse.tokens %}
-                                <span class="{% if token in verse.matching_tokens %}bg-yellow-200{% endif %}">
-                                    {{ token.text }}{{ token.after }}
-                                </span>
+                                <span 
+                                    class="word-token {% if token in verse.matching_tokens %}bg-yellow-200{% endif %}"
+                                    onclick="showDefinition('{{ token.id }}', '{{ token.text|escapejs }}', '{{ token.lemma|escapejs }}', '{{ token.semantic_domain|escapejs }}', '{{ token.contextual_glosses|escapejs }}', '{{ token.definition|escapejs }}')"
+                                    data-lemma="{{ token.lemma }}"
+                                    data-glosses="{{ token.contextual_glosses }}"
+                                >{{ token.text }}{{ token.after }}</span>
                             {% endfor %}
                         </div>
 
@@ -113,9 +208,12 @@
                             <div class="flex flex-wrap gap-x-1 gap-y-3">
                                 {% for token in verse.tokens %}
                                     <div class="inline-flex flex-col items-center text-center">
-                                        <span class="text-lg {% if token in verse.matching_tokens %}bg-yellow-200{% endif %}">
-                                            {{ token.text }}{{ token.after }}
-                                        </span>
+                                        <span 
+                                            class="text-lg word-token {% if token in verse.matching_tokens %}bg-yellow-200{% endif %}"
+                                            onclick="showDefinition('{{ token.id }}', '{{ token.text|escapejs }}', '{{ token.lemma|escapejs }}', '{{ token.semantic_domain|escapejs }}', '{{ token.contextual_glosses|escapejs }}', '{{ token.definition|escapejs }}')"
+                                            data-lemma="{{ token.lemma }}"
+                                            data-glosses="{{ token.contextual_glosses }}"
+                                        >{{ token.text }}{{ token.after }}</span>
                                         <span class="text-xs text-gray-600">{{ token.gloss }}</span>
                                     </div>
                                 {% endfor %}
@@ -181,6 +279,38 @@
     {% endif %}
 </div>
 
+<!-- Definition Drawer -->
+<div id="definitionDrawer" class="definition-drawer">
+    <div class="drawer-handle"></div>
+    <div class="definition-drawer-content">
+        <span class="close-drawer" onclick="closeDefinitionDrawer()">&times;</span>
+        
+        <div class="definition-header mb-3">
+            <h3 id="drawerGreekWord" class="text-2xl font-bold mb-1"></h3>
+            <div class="flex gap-2 text-sm text-gray-600">
+                <span id="drawerLemma"></span>
+            </div>
+        </div>
+        
+        <div class="definition-body">
+            <div class="mb-2">
+                <span class="font-semibold">Domain:</span> 
+                <span id="drawerDomain" class="text-gray-700"></span>
+            </div>
+            
+            <div class="mb-3">
+                <span class="font-semibold">Glosses:</span> 
+                <span id="drawerGlosses" class="text-gray-700 definition-glosses"></span>
+            </div>
+            
+            <div>
+                <span class="font-semibold">Definition:</span>
+                <p id="drawerDefinition" class="mt-1 text-gray-700 definition-text"></p>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
 function updateInterlinearDisplay() {
     const urlParams = new URLSearchParams(window.location.search);
@@ -216,5 +346,117 @@ function toggleAllInterlinear() {
     
     window.location.search = newParams.toString();
 }
+
+// Definition drawer functions
+function showDefinition(tokenId, greekWord, lemma, domain, glosses, definition) {
+    const drawer = document.getElementById('definitionDrawer');
+    const drawerGreekWord = document.getElementById('drawerGreekWord');
+    const drawerLemma = document.getElementById('drawerLemma');
+    const drawerDomain = document.getElementById('drawerDomain');
+    const drawerGlosses = document.getElementById('drawerGlosses');
+    const drawerDefinition = document.getElementById('drawerDefinition');
+    
+    // Set the content
+    drawerGreekWord.textContent = greekWord || 'Unknown';
+    drawerLemma.textContent = lemma || 'Not available';
+    drawerDomain.textContent = domain || 'Not specified';
+    drawerGlosses.textContent = glosses || 'Not available';
+    
+    // Enhance the message for tokens without definitions
+    if (!definition && !glosses) {
+        drawerDefinition.textContent = 'No detailed definition is available for this word.';
+    } else {
+        drawerDefinition.textContent = definition || 'No definition available for this token.';
+    }
+    
+    // Show the drawer
+    drawer.classList.add('active');
+    
+    // Track the current token
+    document.querySelectorAll('.word-token').forEach(token => {
+        token.setAttribute('data-current', 'false');
+    });
+    
+    // Mark current token
+    document.querySelectorAll(`.word-token[data-lemma="${lemma}"]`).forEach(token => {
+        if (token.textContent.trim().startsWith(greekWord)) {
+            token.setAttribute('data-current', 'true');
+        }
+    });
+    
+    // Add backdrop for mobile
+    if (window.innerWidth < 768) {
+        const backdrop = document.createElement('div');
+        backdrop.id = 'drawerBackdrop';
+        backdrop.style.position = 'fixed';
+        backdrop.style.top = '0';
+        backdrop.style.left = '0';
+        backdrop.style.width = '100%';
+        backdrop.style.height = '100%';
+        backdrop.style.backgroundColor = 'rgba(0, 0, 0, 0.4)';
+        backdrop.style.zIndex = '40';
+        backdrop.addEventListener('click', closeDefinitionDrawer);
+        document.body.appendChild(backdrop);
+    }
+}
+
+function closeDefinitionDrawer() {
+    const drawer = document.getElementById('definitionDrawer');
+    drawer.classList.remove('active');
+    
+    // Remove backdrop if it exists
+    const backdrop = document.getElementById('drawerBackdrop');
+    if (backdrop) {
+        backdrop.remove();
+    }
+}
+
+// Close drawer with ESC key
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        closeDefinitionDrawer();
+    }
+});
+
+// Add swipe down to close for mobile
+document.addEventListener('DOMContentLoaded', function() {
+    const drawer = document.getElementById('definitionDrawer');
+    const handle = document.querySelector('.drawer-handle');
+    
+    let startY = 0;
+    let currentY = 0;
+    let isDragging = false;
+    
+    handle.addEventListener('touchstart', function(e) {
+        startY = e.touches[0].clientY;
+        isDragging = true;
+    });
+    
+    document.addEventListener('touchmove', function(e) {
+        if (!isDragging) return;
+        currentY = e.touches[0].clientY;
+        const diffY = currentY - startY;
+        
+        if (diffY > 0) { // Only allow swiping down
+            drawer.style.transform = `translateY(${diffY}px)`;
+            e.preventDefault();
+        }
+    });
+    
+    document.addEventListener('touchend', function() {
+        if (!isDragging) return;
+        isDragging = false;
+        
+        const diffY = currentY - startY;
+        if (diffY > 100) { // If swipe is long enough, close the drawer
+            closeDefinitionDrawer();
+        } else {
+            drawer.style.transform = ''; // Reset transform
+        }
+    });
+    
+    // No hover behavior - we only use clicks now
+    // This is a more predictable and less intrusive experience
+});
 </script>
 {% endblock %}

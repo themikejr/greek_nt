@@ -43,6 +43,12 @@ class Token(models.Model):
     # Semantic fields
     domain = models.CharField(max_length=20, blank=True)
     ln = models.CharField(max_length=20, blank=True)  # Louw-Nida reference
+    
+    # SDBG definitional data
+    sense_id = models.CharField(max_length=100, blank=True)
+    semantic_domain = models.CharField(max_length=100, blank=True)
+    contextual_glosses = models.CharField(max_length=200, blank=True)
+    definition = models.TextField(blank=True)
 
     # Reference fields
     frame = models.CharField(max_length=100, blank=True)
