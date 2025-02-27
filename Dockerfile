@@ -67,10 +67,11 @@ USER app
 RUN mkdir -p /opt/greek-nt/src/staticfiles && \
     /opt/greek-nt/src/.venv/bin/python manage.py collectstatic --noinput
 
-# Create a script to run migrations, load data, and start the server
+# Create a script to run the deploy_db command and start the server
 RUN echo '#!/bin/bash\n\
-/opt/greek-nt/src/.venv/bin/python manage.py migrate --noinput\n\
-/opt/greek-nt/src/.venv/bin/python manage.py load_token_data --all\n\
+echo "Starting database deployment..."\n\
+/opt/greek-nt/src/.venv/bin/python manage.py deploy_db\n\
+echo "Starting web server..."\n\
 /opt/greek-nt/src/.venv/bin/gunicorn --bind 0.0.0.0:8000 greek_nt.wsgi:application' > /opt/greek-nt/src/start.sh && \
 chmod +x /opt/greek-nt/src/start.sh && \
 chown app:app /opt/greek-nt/src/start.sh
