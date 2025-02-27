@@ -197,7 +197,7 @@
                             {% for token in verse.tokens %}
                                 <span 
                                     class="word-token {% if token in verse.matching_tokens %}bg-yellow-200{% endif %}"
-                                    onclick="showDefinition('{{ token.id }}', '{{ token.text|escapejs }}', '{{ token.lemma|escapejs }}', '{{ token.semantic_domain|escapejs }}', '{{ token.contextual_glosses|escapejs }}', '{{ token.definition|escapejs }}')"
+                                    onclick="showDefinition('{{ token.id }}', '{{ token.text|escapejs }}', '{{ token.lemma|escapejs }}', '{{ token.semantic_domain|escapejs }}', '{{ token.contextual_glosses|escapejs }}', '{{ token.definition|escapejs }}', '{{ token.morph|escapejs }}', '{{ token.person|escapejs }}', '{{ token.number|escapejs }}', '{{ token.gender|escapejs }}', '{{ token.case|escapejs }}', '{{ token.tense|escapejs }}', '{{ token.voice|escapejs }}', '{{ token.mood|escapejs }}')"
                                     data-lemma="{{ token.lemma }}"
                                     data-glosses="{{ token.contextual_glosses }}"
                                 >{{ token.text }}</span>{{ token.after }}
@@ -211,7 +211,7 @@
                                         <div class="whitespace-nowrap">
                                             <span 
                                                 class="text-lg word-token {% if token in verse.matching_tokens %}bg-yellow-200{% endif %}"
-                                                onclick="showDefinition('{{ token.id }}', '{{ token.text|escapejs }}', '{{ token.lemma|escapejs }}', '{{ token.semantic_domain|escapejs }}', '{{ token.contextual_glosses|escapejs }}', '{{ token.definition|escapejs }}')"
+                                                onclick="showDefinition('{{ token.id }}', '{{ token.text|escapejs }}', '{{ token.lemma|escapejs }}', '{{ token.semantic_domain|escapejs }}', '{{ token.contextual_glosses|escapejs }}', '{{ token.definition|escapejs }}', '{{ token.morph|escapejs }}', '{{ token.person|escapejs }}', '{{ token.number|escapejs }}', '{{ token.gender|escapejs }}', '{{ token.case|escapejs }}', '{{ token.tense|escapejs }}', '{{ token.voice|escapejs }}', '{{ token.mood|escapejs }}')"
                                                 data-lemma="{{ token.lemma }}"
                                                 data-glosses="{{ token.contextual_glosses }}"
                                             >{{ token.text }}</span><span class="text-lg">{{ token.after }}</span>
@@ -288,26 +288,36 @@
         <span class="close-drawer" onclick="closeDefinitionDrawer()">&times;</span>
         
         <div class="definition-header mb-3">
-            <h3 id="drawerGreekWord" class="text-2xl font-bold mb-1"></h3>
-            <div class="flex gap-2 text-sm text-gray-600">
-                <span id="drawerLemma"></span>
+            <div class="flex items-center">
+                <h3 id="drawerGreekWord" class="text-2xl font-bold"></h3>
+            </div>
+            <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm mt-1">
+                <span id="drawerLemma" class="text-gray-600"></span>
             </div>
         </div>
         
         <div class="definition-body">
-            <div class="mb-2">
-                <span class="font-semibold">Domain:</span> 
-                <span id="drawerDomain" class="text-gray-700"></span>
+            <!-- Ultra-compact morphology section -->
+            <div id="morphologySection" class="mb-2 text-sm text-gray-600">
+                <div id="morphologyDetails" class="italic"></div>
             </div>
             
-            <div class="mb-3">
-                <span class="font-semibold">Glosses:</span> 
-                <span id="drawerGlosses" class="text-gray-700 definition-glosses"></span>
-            </div>
-            
-            <div>
-                <span class="font-semibold">Definition:</span>
-                <p id="drawerDefinition" class="mt-1 text-gray-700 definition-text"></p>
+            <!-- Streamlined definition section -->
+            <div class="pt-1">
+                <!-- Domain as a header above everything -->
+                <div id="domainContainer" class="">
+                    <h4 id="drawerDomain" class="text-sm text-gray-500 italic"></h4>
+                </div>
+                
+                <!-- Glosses between domain and definition, even smaller -->
+                <div class="">
+                    <span id="drawerGlosses" class="definition-glosses text-xs text-gray-600"></span>
+                </div>
+                
+                <!-- Definition with slightly larger text -->
+                <div>
+                    <p id="drawerDefinition" class="text-gray-900 definition-text text-base mt--1"></p>
+                </div>
             </div>
         </div>
     </div>
@@ -350,7 +360,7 @@ function toggleAllInterlinear() {
 }
 
 // Definition drawer functions
-function showDefinition(tokenId, greekWord, lemma, domain, glosses, definition) {
+function showDefinition(tokenId, greekWord, lemma, domain, glosses, definition, morph, person, number, gender, caseVal, tense, voice, mood) {
     const drawer = document.getElementById('definitionDrawer');
     const drawerGreekWord = document.getElementById('drawerGreekWord');
     const drawerLemma = document.getElementById('drawerLemma');
@@ -358,17 +368,103 @@ function showDefinition(tokenId, greekWord, lemma, domain, glosses, definition) 
     const drawerGlosses = document.getElementById('drawerGlosses');
     const drawerDefinition = document.getElementById('drawerDefinition');
     
-    // Set the content
+    // Morphology section
+    const morphologySection = document.getElementById('morphologySection');
+    
+    // Set the basic content
     drawerGreekWord.textContent = greekWord || 'Unknown';
     drawerLemma.textContent = lemma || 'Not available';
-    drawerDomain.textContent = domain || 'Not specified';
-    drawerGlosses.textContent = glosses || 'Not available';
     
-    // Enhance the message for tokens without definitions
-    if (!definition && !glosses) {
-        drawerDefinition.textContent = 'No detailed definition is available for this word.';
+    // Add domain if it exists as a header above definition, otherwise hide it
+    const domainContainer = document.getElementById('domainContainer');
+    if (domain && domain.trim() !== '') {
+        drawerDomain.textContent = domain;
+        domainContainer.style.display = 'block';
     } else {
-        drawerDefinition.textContent = definition || 'No definition available for this token.';
+        domainContainer.style.display = 'none';
+    }
+    
+    // Set glosses with better formatting
+    if (glosses && glosses.trim() !== '') {
+        drawerGlosses.textContent = glosses;
+        drawerGlosses.style.display = 'inline';
+    } else {
+        drawerGlosses.style.display = 'none';
+    }
+    
+    // Format values nicely with capitalization
+    const formatValue = (val) => {
+        if (!val || val === '-') return null; // Return null for empty values
+        return val.charAt(0).toUpperCase() + val.slice(1);
+    };
+    
+    // No longer need to set drawerMorph since we'll include it in the morphology details
+    
+    // Clear the previous morphology details
+    const morphologyDetails = document.getElementById('morphologyDetails');
+    morphologyDetails.innerHTML = '';
+    
+    // Only add morphology details that exist
+    // Include the morph code as the first item if it exists
+    const morphFields = [];
+    
+    // Add the raw morphology code as the first item if it exists
+    if (morph && morph.trim() !== '') {
+        morphFields.push({ label: 'Code', value: morph.trim() });
+    }
+    
+    // Add the other morphology fields
+    if (person) morphFields.push({ label: 'Person', value: formatValue(person) });
+    if (number) morphFields.push({ label: 'Number', value: formatValue(number) });
+    if (gender) morphFields.push({ label: 'Gender', value: formatValue(gender) });
+    if (caseVal) morphFields.push({ label: 'Case', value: formatValue(caseVal) });
+    if (tense) morphFields.push({ label: 'Tense', value: formatValue(tense) });
+    if (voice) morphFields.push({ label: 'Voice', value: formatValue(voice) });
+    if (mood) morphFields.push({ label: 'Mood', value: formatValue(mood) });
+    
+    // Filter out empty fields and create elements
+    const populatedFields = morphFields.filter(field => field.value);
+    
+    // Add each populated field to the display - values only for compactness
+    if (populatedFields.length > 0) {
+        const values = populatedFields.map(field => field.value);
+        const valuesString = values.join(' · ');
+        
+        const span = document.createElement('span');
+        span.textContent = valuesString;
+        morphologyDetails.appendChild(span);
+    }
+    
+    // Show or hide morphology section based on available data
+    const hasMorphology = populatedFields.length > 0;
+    
+    // Only show morphology section if we have morphology fields
+    morphologySection.style.display = hasMorphology ? 'block' : 'none';
+    
+    // Handle definition section with the new ordering
+    if (definition && definition.trim() !== '') {
+        // Normal definition
+        drawerDefinition.textContent = definition;
+        drawerDefinition.parentElement.style.display = 'block';
+    } else if (!glosses || glosses.trim() === '') {
+        // If neither glosses nor definition exists
+        drawerDefinition.textContent = 'No detailed information is available for this word.';
+        drawerDefinition.parentElement.style.display = 'block';
+    } else {
+        // If we have glosses but no definition - hide definition area completely
+        drawerDefinition.textContent = '';
+        drawerDefinition.parentElement.style.display = 'none';
+    }
+    
+    // When neither domain nor definition exist but glosses do exist,
+    // ensure glosses still get proper spacing
+    if ((!domain || domain.trim() === '') && 
+        (!definition || definition.trim() === '') && 
+        glosses && glosses.trim() !== '') {
+        // Add more margin to glosses when they're the only content
+        drawerGlosses.parentElement.classList.add('mb-0');
+    } else {
+        drawerGlosses.parentElement.classList.remove('mb-0');
     }
     
     // Show the drawer
