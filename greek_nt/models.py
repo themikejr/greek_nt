@@ -59,13 +59,18 @@ class Token(models.Model):
     class Meta:
         db_table = "token"  # Explicitly set table name
         indexes = [
-            models.Index(fields=["text"]),
-            models.Index(fields=["ref"]),  # Common lookup by reference
-            models.Index(fields=["lemma"]),  # Common lookup by lemma
-            models.Index(fields=["strong"]),  # Common lookup by Strong's number
+            # Standard indexes that work with all database backends
+            models.Index(fields=["text"], name="token_text_idx"),
+            models.Index(fields=["ref"], name="token_ref_idx"),
+            models.Index(fields=["lemma"], name="token_lemma_idx"),
+            models.Index(fields=["english"], name="token_english_idx"),
+            models.Index(fields=["strong"], name="token_strong_idx"),
             models.Index(fields=["id"], name="token_id_prefix_idx"),
+            
+            # Composite index for search operations
             models.Index(
-                fields=["text", "lemma", "english", "strong"], name="token_search_idx"
+                fields=["text", "lemma", "english", "strong"], 
+                name="token_search_idx"
             ),
         ]
 

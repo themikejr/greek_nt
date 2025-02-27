@@ -98,27 +98,39 @@ DATABASES = {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": BASE_DIR / "db.sqlite3",
     },
-    
-    # Remote Supabase PostgreSQL - combination of parsed URL and explicit options
-    "remote": {
-        **dj_database_url.parse(os.getenv("DATABASE_URL", ""), conn_max_age=600),
-        "OPTIONS": {
-            "sslmode": "require",
-            "gssencmode": "disable",
-            "options": "-c search_path=public -c pool_mode=transaction"
-        }
-    },
-    
-    # Production Supabase PostgreSQL - same as remote for now
-    "production": {
-        **dj_database_url.parse(os.getenv("DATABASE_URL", ""), conn_max_age=600),
-        "OPTIONS": {
-            "sslmode": "require",
-            "gssencmode": "disable",
-            "options": "-c search_path=public -c pool_mode=transaction"
-        }
-    },
 }
+
+# Only try to parse DATABASE_URL if it's actually set
+# This prevents errors during collectstatic in the Dockerfile build process
+if os.getenv("DATABASE_URL"):
+    try:
+        db_from_url = dj_database_url.parse(os.getenv("DATABASE_URL"), conn_max_age=600)
+        
+        # Core PostgreSQL connection options
+        postgres_options = {
+            "sslmode": "require",
+            "gssencmode": "disable",
+            "options": "-c search_path=public -c pool_mode=transaction"
+        }
+        
+        DATABASES["remote"] = {
+            **db_from_url,
+            "OPTIONS": postgres_options,
+            # Connection pooling - reuse connections for better performance
+            "CONN_MAX_AGE": 600,  # Keep connections alive for 10 minutes
+        }
+        
+        DATABASES["production"] = {
+            **db_from_url,
+            "OPTIONS": postgres_options,
+            # Connection pooling - reuse connections for better performance
+            "CONN_MAX_AGE": 600,  # Keep connections alive for 10 minutes
+        }
+    except ValueError:
+        # If DATABASE_URL couldn't be parsed, create fallback entries for remote and production
+        # This ensures the settings module can still be loaded even without DATABASE_URL 
+        DATABASES["remote"] = DATABASES["sqlite"].copy()
+        DATABASES["production"] = DATABASES["sqlite"].copy()
 
 # DATABASE_CONFIG from .env overrides the environment-based default
 # This allows specifying any database configuration regardless of environment
@@ -138,15 +150,39 @@ if DATABASE_CONFIG not in DATABASES:
 # Set the active database configuration
 DATABASES["default"] = DATABASES[DATABASE_CONFIG]
 
-CACHES = {
-    "default": {
-        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
-        "LOCATION": "greek_nt_cache",
-        "TIMEOUT": 86400,  # 24 hours
+# Cache configuration
+# Use more aggressive caching in production
+if ENVIRONMENT == "production":
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+            "LOCATION": "greek_nt_cache",
+            "TIMEOUT": 86400,  # 24 hours
+            "OPTIONS": {
+                "MAX_ENTRIES": 5000,  # Store more items in cache
+                "CULL_FREQUENCY": 3,  # Cull 1/3 of entries when MAX_ENTRIES is reached
+            },
+        }
     }
-    if ENVIRONMENT == "production"
-    else {"BACKEND": "django.core.cache.backends.dummy.DummyCache"}
-}
+    
+    # Cache key settings
+    CACHE_MIDDLEWARE_ALIAS = "default"
+    CACHE_MIDDLEWARE_SECONDS = 86400  # 24 hours
+    CACHE_MIDDLEWARE_KEY_PREFIX = "greek_nt"
+    
+    # Enable per-site cache for production
+    # This will cache entire pages for anonymous users
+    if "django.middleware.cache.UpdateCacheMiddleware" not in MIDDLEWARE:
+        # Add caching middleware - insert at the right positions
+        MIDDLEWARE.insert(0, "django.middleware.cache.UpdateCacheMiddleware")
+        MIDDLEWARE.append("django.middleware.cache.FetchFromCacheMiddleware")
+else:
+    # Development - minimal caching
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.dummy.DummyCache",
+        }
+    }
 
 
 # Password validation

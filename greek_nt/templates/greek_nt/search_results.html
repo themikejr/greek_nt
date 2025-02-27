@@ -200,20 +200,22 @@
                                     onclick="showDefinition('{{ token.id }}', '{{ token.text|escapejs }}', '{{ token.lemma|escapejs }}', '{{ token.semantic_domain|escapejs }}', '{{ token.contextual_glosses|escapejs }}', '{{ token.definition|escapejs }}')"
                                     data-lemma="{{ token.lemma }}"
                                     data-glosses="{{ token.contextual_glosses }}"
-                                >{{ token.text }}{{ token.after }}</span>
+                                >{{ token.text }}</span>{{ token.after }}
                             {% endfor %}
                         </div>
 
                         <div class="interlinear-view hidden">
                             <div class="flex flex-wrap gap-x-1 gap-y-3">
                                 {% for token in verse.tokens %}
-                                    <div class="inline-flex flex-col items-center text-center">
-                                        <span 
-                                            class="text-lg word-token {% if token in verse.matching_tokens %}bg-yellow-200{% endif %}"
-                                            onclick="showDefinition('{{ token.id }}', '{{ token.text|escapejs }}', '{{ token.lemma|escapejs }}', '{{ token.semantic_domain|escapejs }}', '{{ token.contextual_glosses|escapejs }}', '{{ token.definition|escapejs }}')"
-                                            data-lemma="{{ token.lemma }}"
-                                            data-glosses="{{ token.contextual_glosses }}"
-                                        >{{ token.text }}{{ token.after }}</span>
+                                    <div class="inline-flex flex-col items-center text-center min-w-fit">
+                                        <div class="whitespace-nowrap">
+                                            <span 
+                                                class="text-lg word-token {% if token in verse.matching_tokens %}bg-yellow-200{% endif %}"
+                                                onclick="showDefinition('{{ token.id }}', '{{ token.text|escapejs }}', '{{ token.lemma|escapejs }}', '{{ token.semantic_domain|escapejs }}', '{{ token.contextual_glosses|escapejs }}', '{{ token.definition|escapejs }}')"
+                                                data-lemma="{{ token.lemma }}"
+                                                data-glosses="{{ token.contextual_glosses }}"
+                                            >{{ token.text }}</span><span class="text-lg">{{ token.after }}</span>
+                                        </div>
                                         <span class="text-xs text-gray-600">{{ token.gloss }}</span>
                                     </div>
                                 {% endfor %}
