@@ -7,7 +7,9 @@ app = "greek-nt"
   PORT = "8000"
   DJANGO_ALLOWED_HOSTS = "gnt.mikebrinker.net,www.gnt.mikebrinker.net,greek-nt.fly.dev,localhost,0.0.0.0"
   ENVIRONMENT = "production"
+  DATABASE_CONFIG = "production"
   CSRF_TRUSTED_ORIGINS = "https://greek-nt.fly.dev,https://gnt.mikebrinker.net,https://www.gnt.mikebrinker.net"
+  # Database credentials are set as secrets
 
 [http_service]
   internal_port = 8000

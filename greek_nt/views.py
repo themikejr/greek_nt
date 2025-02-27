@@ -1,12 +1,13 @@
 from django.views.generic import ListView, TemplateView, View
 from django.shortcuts import render
 from django.core.paginator import Paginator
-from django.db.models import Q, Count, F, Value, Func, CharField
+from django.db.models import Q, Count, F, Value, Func, CharField, Avg
 from django.db.models.functions import Substr
 from django.views.decorators.cache import cache_page
 from django.utils.decorators import method_decorator
+from django.utils import timezone
 from django.conf import settings
-from .models import Token
+from .models import Token, SearchEvent
 
 
 class HomeView(TemplateView):
@@ -15,6 +16,30 @@ class HomeView(TemplateView):
 
 class AboutView(TemplateView):
     template_name = "greek_nt/about.html"
+
+
+class PopularSearchesView(TemplateView):
+    """
+    View for showing popular searches. Not linked in UI but accessible via URL.
+    """
+    template_name = "greek_nt/popular_searches.html"
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        # Get time period from query parameters (default to 30 days)
+        days = int(self.request.GET.get('days', 30))
+        
+        # Get top searches for the period
+        context['days'] = days
+        context['popular_searches'] = SearchEvent.objects.filter(
+            timestamp__gte=timezone.now() - timezone.timedelta(days=days)
+        ).values('query_text').annotate(
+            count=Count('id'),
+            avg_results=Avg('result_count')
+        ).order_by('-count')[:50]
+        
+        return context
 
 
 @method_decorator(
@@ -75,12 +100,20 @@ class SearchView(View):
                     }
                 )
 
+        # Record the search event (only if there's a valid query)
+        if query.strip():
+            SearchEvent.objects.create(
+                query_text=query[:255],  # Truncate to max length
+                result_count=paginator.count
+            )
+
         context = {
             "verses": verses,
             "paginator": paginator,
             "page_obj": page,
             "is_paginated": paginator.num_pages > 1,
             "total_results": paginator.count,
+            "query": query,
         }
 
         return render(request, self.template_name, context)

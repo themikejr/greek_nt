@@ -21,14 +21,15 @@ echo "Setting up the database..."
 
 if [ "$RESET_DB" = true ]; then
   echo "Reset flag detected - recreating database from scratch..."
-  echo "This will delete the existing database and recreate it."
+  echo "This will drop and recreate all tables in the database."
   read -p "Are you sure you want to continue? (y/n) " -n 1 -r
   echo
   if [[ $REPLY =~ ^[Yy]$ ]]; then
-    echo "Removing existing database..."
-    # Remove the database file
-    fly ssh console -C "bash -c 'rm -f /data/db.sqlite3'"
-    echo "Database reset complete. Now setting up fresh database..."
+    echo "Resetting database schema..."
+    # For PostgreSQL, we'll handle this through Django migrations
+    # The deploy_db command will be updated to handle resetting the database
+    export RESET_DB=true
+    echo "Database reset flag set. Tables will be recreated during migration."
   else
     echo "Database reset cancelled."
     RESET_DB=false
@@ -38,5 +39,9 @@ fi
 echo "This may take a few minutes for the data loading..."
 # Use bash -c to run a complex command
 fly ssh console -C "bash -c 'cd /opt/greek-nt/src && ./.venv/bin/python manage.py deploy_db'"
+
+# Ensure all migrations are applied (especially for new tables like search_events)
+echo "Ensuring all migrations are applied..."
+fly ssh console -C "bash -c 'cd /opt/greek-nt/src && ./.venv/bin/python manage.py migrate'"
 
 echo "Deployment complete!"

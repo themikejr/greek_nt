@@ -11,7 +11,13 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 import os
+import sys
 from pathlib import Path
+import dj_database_url
+from dotenv import load_dotenv
+
+# Load environment variables from .env file with override to ensure latest values
+load_dotenv(override=True)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -82,16 +88,55 @@ TEMPLATES = [
 WSGI_APPLICATION = "greek_nt.wsgi.application"
 
 
-# Database
+# Database configurations
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
+
+# Define all database configurations
 DATABASES = {
-    "default": {
+    # Local SQLite database
+    "sqlite": {
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME": "/data/db.sqlite3"
-        if os.getenv("ENVIRONMENT") == "production"
-        else BASE_DIR / "db.sqlite3",
-    }
+        "NAME": BASE_DIR / "db.sqlite3",
+    },
+    
+    # Remote Supabase PostgreSQL - combination of parsed URL and explicit options
+    "remote": {
+        **dj_database_url.parse(os.getenv("DATABASE_URL", ""), conn_max_age=600),
+        "OPTIONS": {
+            "sslmode": "require",
+            "gssencmode": "disable",
+            "options": "-c search_path=public -c pool_mode=transaction"
+        }
+    },
+    
+    # Production Supabase PostgreSQL - same as remote for now
+    "production": {
+        **dj_database_url.parse(os.getenv("DATABASE_URL", ""), conn_max_age=600),
+        "OPTIONS": {
+            "sslmode": "require",
+            "gssencmode": "disable",
+            "options": "-c search_path=public -c pool_mode=transaction"
+        }
+    },
 }
+
+# DATABASE_CONFIG from .env overrides the environment-based default
+# This allows specifying any database configuration regardless of environment
+DATABASE_CONFIG = os.getenv("DATABASE_CONFIG")
+
+# If DATABASE_CONFIG wasn't explicitly set in .env, use environment-based default
+if not DATABASE_CONFIG:
+    if ENVIRONMENT == "production":
+        DATABASE_CONFIG = "production"
+    else:
+        DATABASE_CONFIG = "sqlite"
+
+# If the specified configuration doesn't exist, fall back to sqlite
+if DATABASE_CONFIG not in DATABASES:
+    DATABASE_CONFIG = "sqlite"
+
+# Set the active database configuration
+DATABASES["default"] = DATABASES[DATABASE_CONFIG]
 
 CACHES = {
     "default": {

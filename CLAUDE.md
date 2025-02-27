@@ -23,3 +23,4 @@
 - Handle errors with try/except and provide helpful messages
 - Add docstrings to all functions and classes
 - Prefer explicit over implicit
+- Ask django to generate migrations
