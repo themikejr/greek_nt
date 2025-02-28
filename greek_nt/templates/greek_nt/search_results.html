@@ -305,18 +305,18 @@
             <!-- Streamlined definition section -->
             <div class="pt-1">
                 <!-- Domain as a header above everything -->
-                <div id="domainContainer" class="">
+                <div id="domainContainer" class="mb-0">
                     <h4 id="drawerDomain" class="text-sm text-gray-500 italic"></h4>
                 </div>
                 
                 <!-- Glosses between domain and definition, even smaller -->
-                <div class="">
-                    <span id="drawerGlosses" class="definition-glosses text-xs text-gray-600"></span>
+                <div class="mt--1">
+                    <span id="drawerGlosses" class="definition-glosses text-xs text-gray-600 mt--1"></span>
                 </div>
                 
                 <!-- Definition with slightly larger text -->
                 <div>
-                    <p id="drawerDefinition" class="text-gray-900 definition-text text-base mt--1"></p>
+                    <p id="drawerDefinition" class="text-gray-900 definition-text text-sm mt--1"></p>
                 </div>
             </div>
         </div>
@@ -360,7 +360,26 @@ function toggleAllInterlinear() {
 }
 
 // Definition drawer functions
-function showDefinition(tokenId, greekWord, lemma, domain, glosses, definition, morph, person, number, gender, caseVal, tense, voice, mood) {
+function showDefinition(tokenId, greekWord, lemma, domain, glosses, definition, morph, person, number, gender, caseVal, tense, voice, mood, isPinned = true) {
+    // Helper function to decode Unicode escape sequences if needed
+    const decodeUnicode = (str) => {
+        try {
+            // If the string contains escape sequences like \u002D, decode them
+            if (str && typeof str === 'string' && str.includes('\\u')) {
+                return JSON.parse('"' + str.replace(/"/g, '\\"') + '"');
+            }
+            return str;
+        } catch (e) {
+            console.error("Error decoding string:", str, e);
+            return str;
+        }
+    };
+    
+    // Decode all text parameters to handle Unicode escape sequences
+    [greekWord, lemma, domain, glosses, definition, morph, person, number, gender, caseVal, tense, voice, mood]
+        = [greekWord, lemma, domain, glosses, definition, morph, person, number, gender, caseVal, tense, voice, mood]
+            .map(decodeUnicode);
+    
     const drawer = document.getElementById('definitionDrawer');
     const drawerGreekWord = document.getElementById('drawerGreekWord');
     const drawerLemma = document.getElementById('drawerLemma');
@@ -386,7 +405,9 @@ function showDefinition(tokenId, greekWord, lemma, domain, glosses, definition, 
     
     // Set glosses with better formatting
     if (glosses && glosses.trim() !== '') {
-        drawerGlosses.textContent = glosses;
+        // Split glosses on semicolons and create a proper comma-separated list
+        const glossesList = glosses.split(';').map(gloss => gloss.trim());
+        drawerGlosses.textContent = glossesList.join(', ');
         drawerGlosses.style.display = 'inline';
     } else {
         drawerGlosses.style.display = 'none';
@@ -516,7 +537,7 @@ document.addEventListener('keydown', function(event) {
     }
 });
 
-// Add swipe down to close for mobile
+// Add swipe down to close for mobile and hover for desktop
 document.addEventListener('DOMContentLoaded', function() {
     const drawer = document.getElementById('definitionDrawer');
     const handle = document.querySelector('.drawer-handle');
@@ -524,7 +545,11 @@ document.addEventListener('DOMContentLoaded', function() {
     let startY = 0;
     let currentY = 0;
     let isDragging = false;
+    let isDrawerPinned = false; // Track if drawer was opened by click vs hover
+    let hoverTimer = null;      // For hover delay
+    let currentToken = null;    // Track the current hovered token
     
+    // Mobile swipe handlers
     handle.addEventListener('touchstart', function(e) {
         startY = e.touches[0].clientY;
         isDragging = true;
@@ -553,8 +578,87 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    // No hover behavior - we only use clicks now
-    // This is a more predictable and less intrusive experience
+    // Add hover behavior for desktop devices
+    if (window.innerWidth >= 768) {
+        // Function to parse parameters from the onclick attribute
+        function parseOnclickParams(element) {
+            // Get the onclick attribute content
+            const onclickAttr = element.getAttribute('onclick');
+            if (!onclickAttr) return null;
+            
+            // Extract the parameters
+            const matches = onclickAttr.match(/'([^']*)'/g);
+            if (!matches) return null;
+            
+            // Clean up the quotes and decode Unicode escape sequences
+            return matches.map(param => {
+                const cleanParam = param.replace(/'/g, '');
+                // Decode Unicode escape sequences like \u002D (hyphen) and \u003B (semicolon)
+                return JSON.parse('"' + cleanParam.replace(/"/g, '\\"') + '"');
+            });
+        }
+        
+        // Add hover events to all word tokens
+        document.querySelectorAll('.word-token').forEach(token => {
+            // Store the original onclick attribute
+            const originalOnclick = token.getAttribute('onclick');
+            
+            // Add mouseenter event
+            token.addEventListener('mouseenter', function() {
+                if (isDrawerPinned) return; // Skip if drawer is pinned
+                
+                // Get parameters from the onclick attribute
+                const params = parseOnclickParams(token);
+                if (!params) return;
+                
+                // Clear any existing hover timer
+                clearTimeout(hoverTimer);
+                currentToken = token;
+                
+                // Set a short delay before showing the drawer (prevents flicker on quick mouse movements)
+                hoverTimer = setTimeout(() => {
+                    // Use the parsed parameters to call showDefinition with isPinned=false
+                    showDefinition(...params, false);
+                }, 200);
+            });
+            
+            // Add mouseleave event to track when user leaves the token
+            token.addEventListener('mouseleave', function() {
+                clearTimeout(hoverTimer);
+                currentToken = null;
+            });
+            
+            // Override onclick to set pinned state
+            token.onclick = function(e) {
+                // Prevent the original onclick from firing
+                e.preventDefault();
+                e.stopPropagation();
+                
+                // Get parameters and call showDefinition with isPinned=true
+                const params = parseOnclickParams(token);
+                if (params) {
+                    isDrawerPinned = true;
+                    showDefinition(...params, true);
+                }
+                
+                return false;
+            };
+        });
+        
+        // Close drawer when mouse leaves it (if not pinned)
+        drawer.addEventListener('mouseleave', function() {
+            if (!isDrawerPinned) {
+                closeDefinitionDrawer();
+            }
+        });
+        
+        // Override the close function to reset the pinned state
+        const originalCloseDrawer = closeDefinitionDrawer;
+        closeDefinitionDrawer = function() {
+            isDrawerPinned = false;
+            originalCloseDrawer();
+        };
+    }
 });
 </script>
 {% endblock %}
