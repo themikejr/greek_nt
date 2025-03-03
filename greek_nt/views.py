@@ -66,13 +66,15 @@ class SearchView(View):
         # by fetching related objects in fewer database queries
 
         # Get matching verse IDs with a more efficient query
-        # The DISTINCT ON approach is more efficient in PostgreSQL
+        # For Greek text and lemma, continue using contains logic
+        # For English glosses, use a regex pattern that matches whole words
         verse_ids = (
             Token.objects.filter(
-                Q(text__icontains=query)
-                | Q(lemma__icontains=query)
-                | Q(english__icontains=query)
-                | Q(strong__icontains=query)
+                Q(text__icontains=query) |
+                Q(lemma__icontains=query) |
+                # Match whole words only for English glosses
+                Q(english__regex=r'(^|\W){}($|\W)'.format(query)) |
+                Q(strong__icontains=query)
             )
             .annotate(verse_id=Substr("id", 1, 9))
             .values("verse_id")
@@ -121,10 +123,14 @@ class SearchView(View):
                     # Only match on the token text itself, not the after spaces/punctuation
                     matching_tokens = []
                     for token in tokens:
+                        # For Greek text and lemma, use substring matching
+                        # For English glosses, use whole word matching
+                        english_words = token.english.lower().split()
+                        
                         if (
                             query in token.text.lower()
                             or query in token.lemma.lower()
-                            or query in token.english.lower()
+                            or query in english_words  # Whole word matching for English
                             or query in token.strong.lower()
                         ):
                             matching_tokens.append(token)
