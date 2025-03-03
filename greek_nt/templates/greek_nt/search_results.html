@@ -503,19 +503,19 @@ function showDefinition(tokenId, greekWord, lemma, domain, glosses, definition, 
         }
     });
     
-    // Add backdrop for mobile
+    // Add invisible touch layer for closing drawer when tapping away
     if (window.innerWidth < 768) {
-        const backdrop = document.createElement('div');
-        backdrop.id = 'drawerBackdrop';
-        backdrop.style.position = 'fixed';
-        backdrop.style.top = '0';
-        backdrop.style.left = '0';
-        backdrop.style.width = '100%';
-        backdrop.style.height = '100%';
-        backdrop.style.backgroundColor = 'rgba(0, 0, 0, 0.4)';
-        backdrop.style.zIndex = '40';
-        backdrop.addEventListener('click', closeDefinitionDrawer);
-        document.body.appendChild(backdrop);
+        const touchLayer = document.createElement('div');
+        touchLayer.id = 'drawerTouchLayer';
+        touchLayer.style.position = 'fixed';
+        touchLayer.style.top = '0';
+        touchLayer.style.left = '0';
+        touchLayer.style.width = '100%';
+        touchLayer.style.height = '100%';
+        touchLayer.style.zIndex = '40';
+        touchLayer.style.backgroundColor = 'transparent';
+        touchLayer.addEventListener('click', closeDefinitionDrawer);
+        document.body.appendChild(touchLayer);
     }
 }
 
@@ -523,10 +523,10 @@ function closeDefinitionDrawer() {
     const drawer = document.getElementById('definitionDrawer');
     drawer.classList.remove('active');
     
-    // Remove backdrop if it exists
-    const backdrop = document.getElementById('drawerBackdrop');
-    if (backdrop) {
-        backdrop.remove();
+    // Remove the touch layer if it exists
+    const touchLayer = document.getElementById('drawerTouchLayer');
+    if (touchLayer) {
+        touchLayer.remove();
     }
 }
 
@@ -564,7 +564,7 @@ document.addEventListener('DOMContentLoaded', function() {
             drawer.style.transform = `translateY(${diffY}px)`;
             e.preventDefault();
         }
-    });
+    }, { passive: false });
     
     document.addEventListener('touchend', function() {
         if (!isDragging) return;
